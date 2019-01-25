@@ -2,13 +2,15 @@ import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
 import ImagePicker from "react-native-image-crop-picker"
 import { RNS3 } from 'react-native-aws3'
+import options from './aws-config.json'
 import style from './style'
 
 class App extends Component {
 
   state = {
     file: null,
-    uploading: false
+    uploading: false,
+    success: false
   }
 
   openGallery = () => {
@@ -31,34 +33,20 @@ class App extends Component {
       type: mime
     }
 
-    const options = {
-      keyPrefix: "uploads/",
-      bucket: "s3poc-dev",
-      region: "us-east-1",
-      accessKey: "AKIAII6EIT2N7ZAI6V3A",
-      secretKey: "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",
-      successActionStatus: 201
-    }
-
-    this.setState({ uploading: true })
+    this.setState({ uploading: true, success: false })
 
     RNS3.put(file, options).then(response => {
-      this.setState({ uploading: false })
+      const uploadState = {
+        uploading: false,
+        success: true
+      }
 
       if (response.status !== 201) {
         console.log('ops some error ocurred')
+        uploadState.success = false
       }
-      console.log(response.body);
-      /**
-       * {
-       *   postResponse: {
-       *     bucket: "your-bucket",
-       *     etag : "9f620878e06d28774406017480a59fd4",
-       *     key: "uploads/image.png",
-       *     location: "https://your-bucket.s3.amazonaws.com/uploads%2Fimage.png"
-       *   }
-       * }
-       */
+
+      this.setState({ ...uploadState })
     });
   }
 
@@ -93,6 +81,11 @@ class App extends Component {
                 </TouchableOpacity>
               )
             }
+            {this.state.success && (
+              <Text style={style.successLabel}>
+                Upload successfully
+              </Text>
+            )}
           </View>
         )}
       </View>

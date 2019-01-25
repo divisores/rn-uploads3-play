@@ -22,6 +22,11 @@ const style = StyleSheet.create({
   },
   label: {
     marginVertical: 16
+  },
+  successLabel: {
+    fontSize: 12,
+    color: 'green',
+    marginTop: 4
   }
 })
 
