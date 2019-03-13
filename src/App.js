@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native'
-import ImagePicker from "react-native-image-crop-picker"
+import ImagePicker from 'react-native-image-crop-picker'
 import { RNS3 } from 'react-native-aws3'
 import options from './aws-config.json'
 import style from './style'
 
 class App extends Component {
-
   state = {
     file: null,
     uploading: false,
@@ -15,7 +14,7 @@ class App extends Component {
 
   openGallery = () => {
     ImagePicker.openPicker({ multiple: true })
-      .then(files => {
+      .then((files) => {
         this.setState({ file: files[0] })
       })
       .catch(({ message }) => {
@@ -26,7 +25,7 @@ class App extends Component {
   }
 
   performUpload = () => {
-    const { sourceURL, filename, mime } = this.state.file
+    const { file: { sourceURL, filename, mime } } = this.state
     const file = {
       uri: sourceURL,
       name: filename,
@@ -35,7 +34,7 @@ class App extends Component {
 
     this.setState({ uploading: true, success: false })
 
-    RNS3.put(file, options).then(response => {
+    RNS3.put(file, options).then((response) => {
       const uploadState = {
         uploading: false,
         success: true
@@ -47,10 +46,12 @@ class App extends Component {
       }
 
       this.setState({ ...uploadState })
-    });
+    })
   }
 
   render() {
+    const { file, uploading, success } = this.state
+
     return (
       <View style={style.container}>
         <View style={style.section}>
@@ -63,12 +64,12 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </View>
-        {this.state.file && (
+        {file && (
           <View style={style.section}>
             <Text style={style.label}>
-              Selected image: {this.state.file.filename}
+              Selected image: {file.filename}
             </Text>
-            {this.state.uploading
+            {uploading
               ? <ActivityIndicator style={style.uploadingLoader} />
               : (
                 <TouchableOpacity
@@ -81,7 +82,7 @@ class App extends Component {
                 </TouchableOpacity>
               )
             }
-            {this.state.success && (
+            {success && (
               <Text style={style.successLabel}>
                 Upload successfully
               </Text>
